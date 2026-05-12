@@ -1,5 +1,8 @@
 import com.fazecast.jSerialComm.SerialPort;
+
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 
 public class RobotConnection {
@@ -8,11 +11,18 @@ public class RobotConnection {
     private OutputStream out;
     private InputStream in;
 
+    private BufferedReader reader;
+
     public RobotConnection() throws Exception {
+
+        // --------------------------------
+        // PORTE DISPONIBILI
+        // --------------------------------
 
         SerialPort[] ports = SerialPort.getCommPorts();
 
-        System.out.println("PORTE DISPONIBILI:");
+        System.out.println(
+                "PORTE DISPONIBILI:");
 
         for (int i = 0; i < ports.length; i++) {
 
@@ -21,6 +31,10 @@ public class RobotConnection {
                             + ports[i].getSystemPortName());
         }
 
+        // --------------------------------
+        // SCELTA PORTA
+        // --------------------------------
+
         int scelta = Integer.parseInt(
                 javax.swing.JOptionPane
                         .showInputDialog(
@@ -28,7 +42,20 @@ public class RobotConnection {
 
         port = ports[scelta];
 
+        // --------------------------------
+        // CONFIG SERIAL
+        // --------------------------------
+
         port.setBaudRate(9600);
+
+        port.setComPortTimeouts(
+                SerialPort.TIMEOUT_READ_SEMI_BLOCKING,
+                0,
+                0);
+
+        // --------------------------------
+        // APERTURA PORTA
+        // --------------------------------
 
         if (!port.openPort()) {
 
@@ -36,11 +63,28 @@ public class RobotConnection {
                     "Errore apertura porta");
         }
 
+        // --------------------------------
+        // STREAM
+        // --------------------------------
+
         out = port.getOutputStream();
+
         in = port.getInputStream();
 
-        System.out.println("CONNESSO!");
+        // --------------------------------
+        // READER LINEE
+        // --------------------------------
+
+        reader = new BufferedReader(
+                new InputStreamReader(in));
+
+        System.out.println(
+                "CONNESSO!");
     }
+
+    // ==================================
+    // INVIO VELOCITÀ MOTORI
+    // ==================================
 
     public void sendMotorState(
             MotorState state) throws Exception {
@@ -55,6 +99,10 @@ public class RobotConnection {
         out.flush();
     }
 
+    // ==================================
+    // STOP ROBOT
+    // ==================================
+
     public void stopRobot()
             throws Exception {
 
@@ -63,20 +111,13 @@ public class RobotConnection {
         out.flush();
     }
 
+    // ==================================
+    // LETTURA SCAN COMPLETO
+    // ==================================
+
     public String readScan()
             throws Exception {
 
-        if (in.available() <= 0) {
-            return null;
-        }
-
-        String line = "";
-
-        while (in.available() > 0) {
-
-            line += (char) in.read();
-        }
-
-        return line.trim();
+        return reader.readLine();
     }
 }

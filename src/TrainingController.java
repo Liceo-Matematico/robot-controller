@@ -5,9 +5,8 @@ import java.awt.event.KeyEvent;
 public class TrainingController {
 
     private MotorState motors;
-
+    private JTextArea area;
     private RobotConnection robot;
-
     private DatasetRecorder recorder;
 
     private boolean running = false;
@@ -31,6 +30,35 @@ public class TrainingController {
         startScanThread();
     }
 
+    private void aggiornaGUI() {
+
+        String stato = running
+                ? "ROBOT IN MOVIMENTO"
+                : "ROBOT FERMO";
+
+        area.setText(
+                """
+                        CONTROLLI
+
+                        W = + velocità SX
+                        A = - velocità SX
+
+                        I = + velocità DX
+                        L = - velocità DX
+
+                        SPACE = START / STOP
+
+                        ENTER = termina
+
+                        -------------------
+
+                        VEL SX = """ + motors.getVelSX() + """
+
+                        VEL DX = """ + motors.getVelDX() + """
+
+                        """ + stato);
+    }
+
     private void createGUI() {
 
         JFrame frame = new JFrame("Training Robot AI");
@@ -40,27 +68,13 @@ public class TrainingController {
         frame.setDefaultCloseOperation(
                 JFrame.EXIT_ON_CLOSE);
 
-        JTextArea area = new JTextArea();
+        area = new JTextArea();
 
         area.setEditable(false);
 
-        area.setText("""
-                CONTROLLI
-
-                W = + velocità SX
-                A = - velocità SX
-
-                I = + velocità DX
-                L = - velocità DX
-
-                SPACE = START / STOP
-
-                ENTER = termina
-                """);
-
         frame.add(area);
 
-        printMotors();
+        aggiornaGUI();
 
         frame.addKeyListener(
                 new KeyAdapter() {
@@ -81,6 +95,12 @@ public class TrainingController {
                 });
 
         frame.setVisible(true);
+
+        frame.setFocusable(true);
+
+        frame.requestFocus();
+
+        frame.requestFocusInWindow();
     }
 
     private void manageKey(KeyEvent e)
@@ -121,18 +141,22 @@ public class TrainingController {
         // -------------------------
         if (key == KeyEvent.VK_W) {
             motors.incSX();
+            aggiornaGUI();
         }
 
         if (key == KeyEvent.VK_A) {
             motors.decSX();
+            aggiornaGUI();
         }
 
         if (key == KeyEvent.VK_I) {
             motors.incDX();
+            aggiornaGUI();
         }
 
         if (key == KeyEvent.VK_L) {
             motors.decDX();
+            aggiornaGUI();
         }
 
         printMotors();
