@@ -120,4 +120,9 @@ public class RobotConnection {
 
         return reader.readLine();
     }
+
+    public void close() {
+
+        port.closePort();
+    }
 }

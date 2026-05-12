@@ -10,6 +10,7 @@ public class TrainingController {
     private DatasetRecorder recorder;
 
     private boolean running = false;
+    private boolean active = true;
 
     private long startTime;
 
@@ -113,7 +114,11 @@ public class TrainingController {
         // -------------------------
         if (key == KeyEvent.VK_ENTER) {
 
+            active = false;
+
             robot.stopRobot();
+
+            robot.close();
 
             recorder.close();
 
@@ -218,7 +223,7 @@ public class TrainingController {
 
             try {
 
-                while (true) {
+                while (active) {
 
                     String scan = robot.readScan();
 
@@ -239,7 +244,11 @@ public class TrainingController {
 
             } catch (Exception e) {
 
-                e.printStackTrace();
+                if (active) {
+
+                    System.out.println(
+                            "Errore seriale / robot disconnesso");
+                }
             }
 
         }).start();
